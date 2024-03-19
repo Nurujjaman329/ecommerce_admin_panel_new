@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class UploadBannerScreens extends StatefulWidget {
-  const UploadBannerScreens({super.key});
+ static const String routeName = '\UploadBannerScreens';
 
   @override
   State<UploadBannerScreens> createState() => _UploadBannerScreensState();

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class WithdrawlScreens extends StatefulWidget {
-  const WithdrawlScreens({super.key});
+  static const String routeName = '\WithdrawlScreens';
 
   @override
   State<WithdrawlScreens> createState() => _WithdrawlScreensState();

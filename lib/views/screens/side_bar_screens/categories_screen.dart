@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class CategoriesScreen extends StatefulWidget {
-  const CategoriesScreen({super.key});
+  static const String routeName = '\CategoriesScreen';
 
   @override
   State<CategoriesScreen> createState() => _CategoriesScreenState();
