@@ -1,3 +1,4 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 class UploadBannerScreens extends StatefulWidget {
@@ -8,6 +9,19 @@ class UploadBannerScreens extends StatefulWidget {
 }
 
 class _UploadBannerScreensState extends State<UploadBannerScreens> {
+  dynamic _image;
+
+  pickImage() async {
+    FilePickerResult? result = await FilePicker.platform
+        .pickFiles(allowMultiple: false, type: FileType.image);
+
+    if (result != null) {
+      setState(() {
+        _image = result.files.first.bytes;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -43,12 +57,19 @@ class _UploadBannerScreensState extends State<UploadBannerScreens> {
                         ),
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      child: Center(
-                        child: Text('Banners'),
-                      ),
+                      child: _image != null
+                          ? Image.memory(
+                              _image,
+                              fit: BoxFit.cover,
+                            )
+                          : Center(
+                              child: Text('Banner'),
+                            ),
                     ),
                     GestureDetector(
-                      onTap: () {},
+                      onTap: () {
+                        pickImage();
+                      },
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Container(
