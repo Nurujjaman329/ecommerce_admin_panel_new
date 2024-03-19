@@ -64,10 +64,6 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return AdminScaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.yellow.shade900,
-        title: Text('Management'),
-      ),
       sideBar: SideBar(
         items: [
           AdminMenuItem(
@@ -110,6 +106,32 @@ class _MainScreenState extends State<MainScreen> {
         onSelected: (item) {
           screenSelector(item);
         },
+        header: Container(
+          height: 50,
+          width: double.infinity,
+          color: const Color(0xff444444),
+          child: const Center(
+            child: Text(
+              'Header',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
+        footer: Container(
+          height: 50,
+          width: double.infinity,
+          color: const Color(0xff444444),
+          child: const Center(
+            child: Text(
+              'Footer',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ),
       ),
       body: _selectedItem,
     );
