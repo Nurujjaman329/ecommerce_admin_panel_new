@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 class UploadBannerScreens extends StatefulWidget {
@@ -9,7 +11,12 @@ class UploadBannerScreens extends StatefulWidget {
 }
 
 class _UploadBannerScreensState extends State<UploadBannerScreens> {
+  FirebaseStorage _storage = FirebaseStorage.instance;
+
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
   dynamic _image;
+
+  String? fileName;
 
   pickImage() async {
     FilePickerResult? result = await FilePicker.platform
@@ -18,6 +25,29 @@ class _UploadBannerScreensState extends State<UploadBannerScreens> {
     if (result != null) {
       setState(() {
         _image = result.files.first.bytes;
+
+        fileName = result.files.first.name;
+      });
+    }
+  }
+
+  _uploadBannersStorage(dynamic image) async {
+    Reference ref = _storage.ref().child('Banners').child(fileName!);
+
+    UploadTask uploadTask = ref.putData(image);
+
+    TaskSnapshot snapshot = await uploadTask;
+
+    String downloadUrl = await snapshot.ref.getDownloadURL();
+    return downloadUrl;
+  }
+
+  _uploadToFireStore() async {
+    if (_image != null) {
+      String imageUrl = await _uploadBannersStorage(_image);
+
+      await _firestore.collection('banners').doc(fileName).set({
+        'image': imageUrl,
       });
     }
   }
@@ -96,7 +126,9 @@ class _UploadBannerScreensState extends State<UploadBannerScreens> {
                 ),
               ),
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  _uploadToFireStore();
+                },
                 child: Container(
                   height: MediaQuery.of(context).size.height * .040,
                   width: MediaQuery.of(context).size.width * .050,
