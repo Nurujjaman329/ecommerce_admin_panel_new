@@ -1,4 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 
 class CategoriesScreen extends StatefulWidget {
   static const String routeName = '\CategoriesScreen';
@@ -8,11 +12,53 @@ class CategoriesScreen extends StatefulWidget {
 }
 
 class _CategoriesScreenState extends State<CategoriesScreen> {
+  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  uploadCategory() {
+  dynamic _image;
+
+  String? fileName;
+
+  late String categoryName;
+
+  _pickImage() async {
+    FilePickerResult? result = await FilePicker.platform
+        .pickFiles(allowMultiple: false, type: FileType.image);
+
+    if (result != null) {
+      setState(() {
+        _image = result.files.first.bytes;
+
+        fileName = result.files.first.name;
+      });
+    }
+  }
+
+  _uploadCategoryBannerToStorage(dynamic image) async {
+    Reference ref = _storage.ref().child('categoryImages').child(fileName!);
+
+    UploadTask uploadTask = ref.putData(image);
+
+    TaskSnapshot snapshot = await uploadTask;
+    String downloadUrl = await snapshot.ref.getDownloadURL();
+    return downloadUrl;
+  }
+
+  uploadCategory() async {
+    EasyLoading.show();
     if (_formKey.currentState!.validate()) {
-      print("Thank You");
+      String imageUrl = await _uploadCategoryBannerToStorage(_image);
+
+      await _firestore.collection('categories').doc(fileName).set({
+        'image': imageUrl,
+        'categoryName': categoryName,
+      }).whenComplete(() {
+        EasyLoading.dismiss();
+        setState(() {
+          _image = null;
+        });
+      });
     } else {
       print('Very Bad');
     }
@@ -56,12 +102,19 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                           ),
                           borderRadius: BorderRadius.circular(10.0),
                         ),
-                        child: Center(
-                          child: Text('Category '),
-                        ),
+                        child: _image != null
+                            ? Image.memory(
+                                _image,
+                                fit: BoxFit.cover,
+                              )
+                            : Center(
+                                child: Text('Category '),
+                              ),
                       ),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          _pickImage();
+                        },
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Container(
@@ -91,6 +144,9 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                   child: SizedBox(
                     width: 170,
                     child: TextFormField(
+                      onChanged: (value) {
+                        categoryName = value;
+                      },
                       validator: (value) {
                         if (value!.isEmpty) {
                           return 'Category name must not be empty!';
